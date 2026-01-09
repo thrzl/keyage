@@ -44,13 +44,17 @@ impl DatabaseClient {
         self.statements.get(statement)
     }
     pub async fn new() -> Result<Self> {
-        // let database_url = std::env::var("TURSO_DATABASE_URL").expect("database url should be set");
-        // let auth_token =
-        //     std::env::var("TURSO_AUTH_TOKEN").expect("database auth token should be set");
-        // let db = Builder::new_remote(database_url, auth_token)
-        //     .build()
-        //     .await?;
-        let db = Builder::new_local("local.db").build().await?;
+        let db = if cfg!(debug_assertions) {
+            Builder::new_local("local.db").build().await?
+        } else {
+            let database_url =
+                std::env::var("TURSO_DATABASE_URL").expect("database url should be set");
+            let auth_token =
+                std::env::var("TURSO_AUTH_TOKEN").expect("database auth token should be set");
+            Builder::new_remote(database_url, auth_token)
+                .build()
+                .await?
+        };
         let conn = db.connect()?;
         conn.execute("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, handle TEXT UNIQUE, key_content TEXT UNIQUE NOT NULL)", ()).await?;
         let mut statements = HashMap::with_capacity(STATEMENTS.len());
