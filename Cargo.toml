@@ -1,0 +1,21 @@
+[package]
+name = "keyage-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.12.1"
+age = { version = "0.11.2", features = ["armor"] }
+age-xwing = { git = "https://github.com/thrzl/age-xwing", tag = "0.1.0", version = "0.1.0" }
+anyhow = "1.0.100"
+base32 = "0.5.1"
+base64 = "0.22.1"
+chacha20poly1305 = "0.10.1"
+dotenvy = "0.15.7"
+libsql = "0.9.29"
+parking_lot = "0.12.5"
+serde = { version = "1.0.228", features = ["derive"] }
+sha3 = "0.10.8"
+subtle = "2.6.1"
+thiserror = "2.0.17"
+ttl_cache = "0.5.1"
