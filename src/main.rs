@@ -15,7 +15,7 @@ use crate::database::User;
 
 struct AppState {
     secret_key: [u8; 32],
-    db: Arc<DatabaseClient>,
+    db: DatabaseClient,
 }
 
 fn to_epoch_secs(time: &SystemTime) -> u64 {
@@ -193,7 +193,10 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let db = Arc::clone(&db);
         App::new()
-            .app_data(web::Data::new(AppState { secret_key, db }))
+            .app_data(web::Data::new(AppState {
+                secret_key,
+                db: Arc::into_inner(db).unwrap(),
+            }))
             .service(hello)
             .service(echo)
             .service(get_key)
