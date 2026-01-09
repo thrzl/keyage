@@ -2,14 +2,12 @@
 
 an age keyserver that collects as little information as possible
 
-wip at the moment, ironically only supports x25519 keys
-
 this service only stores the following information from you:
 - your public key content
   - a fingerprint (`base32(public_key)[:26]`)
 - a username (optional)
 
-this makes it so that keys can be obtained via a fingerprint or username vs having to directly pass the full key text. it was originally designed for use with the MLKEM768-X25519 recipient type, as the public keys are over 1k characters long which makes them terrible to share
+this makes it so that keys can be obtained via a fingerprint or username vs having to directly pass the full key text. it was originally intended for use with the MLKEM768-X25519 recipient type, as the public keys are over 1k characters long which makes them terrible to share
 
 ## how this works
 
