@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::{Result, anyhow, bail};
 use libsql::{Builder, Row, Statement, params};
 use parking_lot::Mutex;
 use serde::Serialize;
@@ -6,10 +6,11 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use ttl_cache::TtlCache;
 
-const STATEMENTS: [&str; 3] = [
+const STATEMENTS: [&str; 4] = [
     "SELECT * FROM users WHERE id = ?1",
     "SELECT * FROM users WHERE handle = ?1",
     "INSERT INTO users (id, handle, key_content) VALUES (?1, ?2, ?3)",
+    "UPDATE users SET handle = ?1, key_content = ?2 WHERE id = ?3",
 ];
 
 pub struct DatabaseClient {
@@ -74,6 +75,19 @@ impl DatabaseClient {
         self.cache.lock().get(query).cloned()
     }
 
+    pub async fn update_user(&self, id: &String, new_user: User) -> Result<()> {
+        let statement = self
+            .statement("UPDATE users SET handle = ?1, key_content = ?2 WHERE id = ?3")
+            .unwrap();
+
+        statement
+            .execute(params![new_user.handle, new_user.key_content, id.clone()])
+            .await
+            .map_err(|e| anyhow!(e))?;
+
+        Ok(())
+    }
+
     pub async fn get_by_id(&self, id: &String) -> Result<Option<User>> {
         if let Some(cached) = self.get_cache(id) {
             return Ok(Some(cached));
@@ -91,7 +105,6 @@ impl DatabaseClient {
     }
 
     pub async fn get_by_handle(&self, handle: &String) -> Result<Option<User>> {
-        print!("hi??");
         if let Some(cached) = self.get_cache(handle) {
             return Ok(Some(cached));
         }
